@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dardery's Conversion Station</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #EEEEEE;
+        }
+        *{
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+       .nav-bar {
+        background-color: #151515;
+        position: fixed;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+       }
+       .placeholder {
+        height: 110px;
+        background-color: #EEEEEE;
+        width: 100%;
+       }
+       .body-container {
+        width: 80%;
+        padding: 20px;
+        background-color: #EEEEEE;
+        border-radius: 5px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
+        column-gap: 10px;
+       }
+       @media (max-width: 436px) {
+            .placeholder {
+                height: 130px;
+            }
+       }
+       .output{
+        background-color: #A91D3A;
+        color: #EEEEEE;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+       }
+       .body-container *{
+        border-radius: 10px;
+       }
+       button{
+        background-color: #A91D3A;
+        color: #EEEEEE;
+        transition: transform 0.3s ease-in-out;
+       }
+       button:hover{
+        background-color: #C73659;
+        color: #EEEEEE;
+        transform: scale(1.05);
+        cursor: pointer;
+       }
+    </style>
+</head>
+<body>
+    <div class="nav-bar">
+        <h1 style="color: #EEEEEE; margin: 10px;">ConversionStation</h1>
+        <p style="color: #C73659; align-self: flex-end; text-align: right;">(A Front-End Web Development Project By Omar El-Dardery)</p>
+    </div>
+    <div class="placeholder"></div>
+    <div style="width: 100%; display: flex; justify-content: center;">
+        <div class="body-container">
+            <h2>Input</h2>
+            <h2>Convert from:</h2>
+            <input type="text" class="input">
+            <select class="from">
+                <option value="decimal">Decimal</option>
+                <option value="binary">Binary</option>
+                <option value="octal">Octal</option>
+                <option value="hexadecimal">Hexadecimal</option>
+            </select>
+            <h2>Output</h2>
+            <h2>To:</h2>
+            <div class="output"></div>
+            <select class="to">
+                <option value="decimal">Decimal</option>
+                <option value="binary">Binary</option>
+                <option value="octal">Octal</option>
+                <option value="hexadecimal">Hexadecimal</option>
+            </select>
+            <div style="display: flex; flex-direction: column; grid-area: 5 / 2 / 6 / 3;">
+                <button onclick="convert()" style="height: fit-content; width: fit-content; padding: 10px; align-self: flex-end; margin-top: 30px;">Convert</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        function convert() {
+            const input = document.querySelector('.input').value.trim();
+            const fromBase = document.querySelector('.from').value;
+            const toBase = document.querySelector('.to').value;
+
+            let decimalValue = baseToDecimal(input, fromBase);
+            if (isNaN(decimalValue)) {
+                document.querySelector('.output').textContent = 'Invalid input';
+                return;
+            }
+            const outputValue = decimalToBase(decimalValue, toBase);
+            displayResult(outputValue, toBase);
+        }
+
+        function baseToDecimal(value, baseType) {
+            let base = getBase(baseType);
+            let [integerPart, fractionalPart] = value.split('.').map(part => part || "0");
+
+            let integerDecimal = parseInt(integerPart, base);
+            let fractionalDecimal = 0;
+
+            // Convert fractional part
+            if (fractionalPart) {
+                for (let i = 0; i < fractionalPart.length; i++) {
+                    fractionalDecimal += parseInt(fractionalPart[i], base) / Math.pow(base, i + 1);
+                }
+            }
+
+            return integerDecimal + fractionalDecimal;
+        }
+
+        function decimalToBase(decimal, baseType) {
+            let base = getBase(baseType);
+            let integerPart = Math.floor(decimal);
+            let fractionalPart = decimal - integerPart;
+
+            let integerResult = integerPart.toString(base);
+            let fractionalResult = '';
+
+            // Convert fractional part
+            while (fractionalPart !== 0 && fractionalResult.length < 10) {  // Limit fractional places to 10 digits
+                fractionalPart *= base;
+                let digit = Math.floor(fractionalPart);
+                fractionalResult += digit.toString(base);
+                fractionalPart -= digit;
+            }
+
+            return fractionalResult ? `${integerResult}.${fractionalResult}` : integerResult;
+        }
+
+        function getBase(type) {
+            switch (type) {
+                case 'binary': return 2;
+                case 'octal': return 8;
+                case 'hexadecimal': return 16;
+                default: return 10;
+            }
+        }
+
+        function displayResult(outputValue, toBase) {
+            const outputDiv = document.querySelector('.output');
+            outputDiv.innerHTML = ''; // Clear previous results
+
+            const resultElement = document.createElement('p');
+            resultElement.textContent = `${toBase.charAt(0).toUpperCase() + toBase.slice(1)}: ${outputValue}`;
+            outputDiv.appendChild(resultElement);
+        }
+    </script>
+</body>
+</html>
